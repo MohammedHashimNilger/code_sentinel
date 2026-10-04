@@ -1,8 +1,14 @@
+import "dotenv/config";
 import express from "express";
+import { connectDB } from "./config/db.js";
+import userRoutes from "./routes/userRoutes.js";
 
 const app = express();
 
+connectDB();
 app.use(express.json());
+
+app.use("/api/users", userRoutes);
 
 app.get("/api/health", (req, res) => {
   res.status(200).json({
@@ -17,11 +23,14 @@ app.use((req, res, next) => {
 });
 
 app.use((err, req, res, next) => {
-  const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
-  res.status(statusCode).json({
-    success: false,
-    message: err.message,
-  });
+  let statusCode = res.statusCode === 200 ? 500 : res.statusCode;
+  let message = err.message || "Internal server error";
+  if (err.name === "CastError" && err.kind === "ObjectId") {
+    statusCode = 404;
+    message = "Resource not found";
+  }
+
+  res.status(statusCode).json({ success: false, message });
 });
 
 const PORT = 5000;
