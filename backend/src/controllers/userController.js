@@ -20,23 +20,23 @@ export const getUserByID = asyncHandler(async (req, res) => {
 });
 
 export const createUser = asyncHandler(async (req, res) => {
-  const { username, email } = req.body;
+  const { username, email, password } = req.body;
 
-  if (!username || !email) {
+  if (!username || !password) {
     res.status(400);
-    throw new Error("username and email is required");
+    throw new Error("username and password are required");
   }
 
-  const user = await User.create({ username, email });
+  const user = await User.create({ username, email, password });
   return res.status(201).json({ success: true, user });
 });
 
 export const loginUser = asyncHandler(async (req, res) => {
   const { username, password } = req.body;
 
-  const user = mongoose.findOne({ username });
+  const user = await User.findOne({ username });
 
-  if (!username || !(await user.comparePassword(password))) {
+  if (!user || !(await user.comparePassword(password))) {
     res.status(401);
     throw new Error("Invalid username or password");
   }
