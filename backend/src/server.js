@@ -1,12 +1,16 @@
 import "dotenv/config";
 import express from "express";
 import { connectDB } from "./config/db.js";
+import validateEnv from "./config/validateENV.js";
 import userRoutes from "./routes/userRoutes.js";
+import cookieParser from "cookie-parser";
 
 const app = express();
 
 connectDB();
+validateEnv();
 app.use(express.json());
+app.use(cookieParser());
 
 app.use("/api/users", userRoutes);
 
@@ -33,7 +37,7 @@ app.use((err, req, res, next) => {
   res.status(statusCode).json({ success: false, message });
 });
 
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });

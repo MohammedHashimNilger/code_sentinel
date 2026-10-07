@@ -1,5 +1,7 @@
 import asyncHandler from "../utils/asyncHandler.js";
 import { User } from "../models/user.model.js";
+import mongoose from "mongoose";
+import generateToken from "../utils/generateToken.js";
 
 export const getUsers = asyncHandler(async (req, res) => {
   const user = await User.find();
@@ -27,4 +29,27 @@ export const createUser = asyncHandler(async (req, res) => {
 
   const user = await User.create({ username, email });
   return res.status(201).json({ success: true, user });
+});
+
+export const loginUser = asyncHandler(async (req, res) => {
+  const { username, password } = req.body;
+
+  const user = mongoose.findOne({ username });
+
+  if (!username || !(await user.comparePassword(password))) {
+    res.status(401);
+    throw new Error("Invalid username or password");
+  }
+
+  const token = generateToken(user._id);
+
+  res.cookie("token", token, {
+    httpOnly: true,
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+  });
+
+  res.status(200).json({
+    success: true,
+    user: { id: user._id, username: user.username },
+  });
 });

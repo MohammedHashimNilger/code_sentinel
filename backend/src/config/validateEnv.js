@@ -1,4 +1,4 @@
-const REQUIRED_ENV_VARS = ["MONGO_URI"];
+const REQUIRED_ENV_VARS = ["MONGODB_URI"];
 
 const validateEnv = () => {
   const missing = REQUIRED_ENV_VARS.filter((key) => !process.env[key]);
